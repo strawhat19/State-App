@@ -1,24 +1,122 @@
-*, *::before, *::after {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-}
-
-body {
-  display: flex;
-  color: white;
-  background: black;
-  font-family: "Montserrat";
-  justify-content: center;
-  align-items: center;
-  min-height: 100vh;
-}
-
 main {
   width: 100%;
   display: flex;
+  padding-top: 2em;
   align-items: center;
   flex-direction: column;
   justify-content: center;
   grid-gap: 15px;
+}
+main form {
+  width: 100%;
+  display: flex;
+  grid-gap: 10px;
+  align-items: center;
+  flex-direction: column;
+  justify-content: center;
+}
+main .formInner {
+  width: 90%;
+  display: flex;
+  margin: 0 auto;
+  grid-gap: 10px;
+  align-items: center;
+  flex-direction: column;
+  justify-content: center;
+}
+main .formInner input[type=email], main .formInner input[type=text], main .formInner button {
+  width: 100%;
+  border-radius: 10px;
+}
+
+a {
+  color: var(--linkColor);
+  font-weight: var(--boldFont);
+  transition: 300ms ease-in-out;
+}
+
+:root {
+  --transition: 300ms ease-in-out;
+  --linkColor: #2a5d84;
+  --linkHover: #0079a1;
+  --boldFont: 600;
+}
+
+.row {
+  max-width: 64rem;
+}
+
+.userCont {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.userCont .user {
+  font-weight: var(--boldFont);
+}
+.userCont .user .userInner {
+  text-align: right;
+  display: flex;
+  flex-direction: column;
+  grid-gap: 10px;
+}
+.userCont .user .userInner .userAvatar {
+  max-height: 30px;
+}
+
+.apps {
+  display: flex;
+  grid-gap: 2em;
+  padding: 5em 0;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  flex-wrap: wrap;
+}
+.apps .app {
+  min-width: 300px;
+  min-height: 200px;
+  justify-content: center;
+  align-items: center;
+  display: flex;
+  border-radius: 10px;
+  box-shadow: 0 0 2px;
+}
+.apps .app .appInner {
+  width: 90%;
+  margin: 0 auto;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-direction: column;
+  grid-gap: 16px;
+}
+.apps .app .index {
+  position: absolute;
+  font-size: 15em;
+  opacity: 0.1;
+}
+.apps .app a {
+  position: relative;
+}
+.apps .app a::after {
+  content: "";
+  position: absolute;
+  bottom: -5px;
+  left: 0;
+  width: 100%;
+  height: 2px;
+  background: var(--linkColor);
+  transform: scale(0, 1);
+  transform-origin: bottom left;
+  border-radius: 15px;
+  transition: var(--transition);
+}
+.apps .app a:hover {
+  color: var(--linkHover);
+}
+.apps .app a:hover::after {
+  background: var(--linkHover);
+  transform: scale(1, 1);
 }/*# sourceMappingURL=global.css.map */
