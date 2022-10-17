@@ -297,7 +297,7 @@ table#stamps td:first-child {
       width: 25px;
       height: 25px;
       text-indent: -9999px;
-      background-image: url("/dashboard/images/social-icons.png"); }
+    }
     /* line 403, /home/bitnami/projects/apachefriends-web/source-xampp-windows/stylesheets/all.scss */
     .social li.twitter a {
       background-position: 0 0; }
@@ -314,7 +314,7 @@ table#stamps td:first-child {
     .social.large li a {
       width: 70px;
       height: 70px;
-      background-image: url("/dashboard/images/social-icons-large.png"); }
+    }
     /* line 423, /home/bitnami/projects/apachefriends-web/source-xampp-windows/stylesheets/all.scss */
     .social.large li.twitter a {
       background-position: 0 0; }
@@ -493,12 +493,11 @@ ol#articles li span {
 @media only screen and (-webkit-min-device-pixel-ratio: 2), only screen and (-o-min-device-pixel-ratio: 2 / 1), only screen and (min--moz-device-pixel-ratio: 2), only screen and (min-device-pixel-ratio: 2) {
   /* line 680, /home/bitnami/projects/apachefriends-web/source-xampp-windows/stylesheets/all.scss */
   .social li a {
-    background-image: url("/dashboard/images/social-icons@2x.png");
     background-size: auto 25px; }
 
   /* line 684, /home/bitnami/projects/apachefriends-web/source-xampp-windows/stylesheets/all.scss */
   .social.large li a {
-    background-image: url("/dashboard/images/social-icons-large@2x.png");
+    
     background-size: auto 70px; } }
 /* import foundation last */
 /* line 287, /home/bitnami/projects/apachefriends-web/bower_components/foundation/scss/foundation/components/_global.scss */
@@ -3864,7 +3863,6 @@ label {
 /* line 316, /home/bitnami/projects/apachefriends-web/bower_components/foundation/scss/foundation/components/_forms.scss */
 select {
   -webkit-appearance: none !important;
-  background: #fafafa url("data:image/svg+xml;base64, PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZlcnNpb249IjEuMSIgeD0iMHB4IiB5PSIwcHgiIHdpZHRoPSI2cHgiIGhlaWdodD0iM3B4IiB2aWV3Qm94PSIwIDAgNiAzIiBlbmFibGUtYmFja2dyb3VuZD0ibmV3IDAgMCA2IDMiIHhtbDpzcGFjZT0icHJlc2VydmUiPjxwb2x5Z29uIHBvaW50cz0iNS45OTIsMCAyLjk5MiwzIC0wLjAwOCwwICIvPjwvc3ZnPg==") no-repeat;
   background-position-x: 97%;
   background-position-y: center;
   border: 1px solid #cccccc;
@@ -3878,7 +3876,6 @@ select {
     border-radius: 3px; }
   /* line 328, /home/bitnami/projects/apachefriends-web/bower_components/foundation/scss/foundation/components/_forms.scss */
   select:hover {
-    background: #f2f2f2 url("data:image/svg+xml;base64, PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZlcnNpb249IjEuMSIgeD0iMHB4IiB5PSIwcHgiIHdpZHRoPSI2cHgiIGhlaWdodD0iM3B4IiB2aWV3Qm94PSIwIDAgNiAzIiBlbmFibGUtYmFja2dyb3VuZD0ibmV3IDAgMCA2IDMiIHhtbDpzcGFjZT0icHJlc2VydmUiPjxwb2x5Z29uIHBvaW50cz0iNS45OTIsMCAyLjk5MiwzIC0wLjAwOCwwICIvPjwvc3ZnPg==") no-repeat;
     background-position-x: 97%;
     background-position-y: center;
     border-color: #999999; }
@@ -9084,7 +9081,6 @@ ul.sub-nav {
 /* line 805, /home/bitnami/projects/apachefriends-web/source-xampp-windows/stylesheets/all.scss */
 a.pdf {
   display: inline-block;
-  background-image: url("/dashboard/images/pdf-icon.png");
   background-repeat: no-repeat;
   background-position: 0 50%;
   background-size: 33px auto;
