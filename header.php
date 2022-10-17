@@ -12,7 +12,8 @@
           $url;
         }
       $page = $url;
-      $localPage = '/apps/State-App/';
+      $localPage = $page;
+      // $localPage = '/apps/State-App/';
       $title = 'PHP Form Submissions';
 ?>
     <meta charset="UTF-8">
