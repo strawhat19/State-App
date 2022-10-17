@@ -1,6 +1,6 @@
 <?php include('header.php')?>
 <div id="wrapper">
-    <main class="section">
+    <main class="mainSection">
         <form class="php" method="post" action="<?php echo $localPage ?>">
             <span class="formInner">
                 <input type="hidden" name="user" id="user">

@@ -14,13 +14,13 @@
               <li><a href="https://www.apachefriends.org/privacy_policy">Privacy Policy</a></li>
               <li>
                 <a target="_blank" href="http://www.fastly.com/">                    CDN provided by
-                  <img width="48" data-2x="/dashboard/images/fastly-logo@2x.png" src="/dashboard/images/fastly-logo.png" />
+                  
                 </a>
               </li>
             </ul>
           </div>
           <div class="large-4 columns">
-            <p class="text-right">Copyright (c) 2015, Apache Friends</p>
+            <p class="text-right">Copyright (c) 2022</p>
           </div>
         </div>
       </div>

@@ -56,6 +56,7 @@
     const wrapper = dom(`#wrapper`);
     const userCont = domA(`.userRow`);
     const appsInner = dom(`.appsInner`);
+    const mainSection = dom(`.mainSection`);
 
     const body = $(`body`);
     body.attr(`style`,`display: none`);
@@ -105,7 +106,7 @@
                     <div class="userInner">
                         <div class="userName">${user.name}</div>
                         <span class="linkContainer ${user.login}"><a class="githubLink userGit" href="${user.url}"><img src="${user.avatar}" class="userAvatar" /> ${user.login}</a></span>
-                        <div class="userBio">${user.bio}</div>
+                        <div class="userBio ${user?.bio ? `valid` : `hidden`}">${user?.bio}</div>
                     </div>
                   </div>
                 </div>
@@ -147,6 +148,10 @@
           deleteDoc(doc(db, 'githubUsers', event.target.id)).then((data) => console.log(`User Deleted`));
         }));
       });
+
+      let collectionID = `githubUsers`;
+      let projectID = `github-projects-81e89`;
+      let firestoreUsers = fetch(`https://firestore.googleapis.com/v1/projects/${projectID}/databases/(default)/documents/${collectionID}/`).then(res => res.json()).then(dbUsers => console.log(`firestoreUsers`, dbUsers)).catch(error => console.log(`REST API Error Fetching Data`, error));
     }
 
      // Github
@@ -156,7 +161,8 @@
           return asyncData;
       };
 
-      const getGithubData = async (username) => {
+      const getGithubData = async (formValues) => {
+        let username = formValues.username;
         console.log(username);
           // Custom User Object
           class User {
@@ -275,7 +281,8 @@
           $(`.php`).on(`submit`, event => {
             event.preventDefault();
             let formValues = $(`.php`).serializeObject();
-            console.log({...formValues, user: users[0], users});
+            getGithubData(formValues);
+            init();
             
           });
       });
