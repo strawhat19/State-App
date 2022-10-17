@@ -12,8 +12,8 @@
           $url;
         }
       $page = $url;
-      $localPage = $page;
-      // $localPage = '/apps/State-App/';
+      // $localPage = $page;
+      $localPage = '/apps/State-App/';
       $title = 'PHP Form Submissions';
 ?>
     <meta charset="UTF-8">
@@ -30,6 +30,7 @@
     <title><?php echo $title; ?></title>
 </head>
 <body>
+<script type="module" src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js" defer></script>
 <div class="contain-to-grid">
   <nav class="top-bar" data-topbar>
       <ul class="title-area">
@@ -46,12 +47,17 @@
       <section class="top-bar-section">
       <!-- Right Nav Section -->
       <ul class="right">
-          <li class="active"><a href="/applications">Applications</a></li>
+          <li class="active">
+            <a href="#" class="usersCount">
+              <script type="module" defer>
+                $(`.usersCount`).html(JSON.parse(localStorage.getItem(`users`)).length + ` User(s)`);
+              </script>
+            </a>
+          </li>
       </ul>
       </section>
   </nav>
 </div>
-<script type="module" src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js" defer></script>
 <script type="module" defer>
     // Firestore Imports
     // https://firebase.google.com/docs/web/setup#available-libraries
@@ -141,35 +147,33 @@
 
       const getGithubData = async (formValues) => {
         let username = formValues.username;
+        const repoURL = `https://api.github.com/users/${username}/repos`;
+        const githubURL = `https://api.github.com/users/${username}`;
+        const repositories = JSON.parse(localStorage.getItem(`repositories`)) || [];
+        const responseRepos = await fetch(repoURL);
+        const response = await fetch(githubURL);
 
-          const repoURL = `https://api.github.com/users/${username}/repos`;
-          const githubURL = `https://api.github.com/users/${username}`;
-          const repositories = JSON.parse(localStorage.getItem(`repositories`)) || [];
-          const responseRepos = await fetch(repoURL);
-          const response = await fetch(githubURL);
-          
-          if (!response.ok || !responseRepos.ok) {
-              console.log(`Fetch Error`);
-              console.clear();
-          } else {
-             // Get Github Info
-              const github = await response.json();
-              const githubRepos = await responseRepos.json();
-              const {name,html_url,bio,blog,avatar_url,login,public_repos,repos_url,starred_url,followers,following} = github;
+        afterGitUserCreated(user, formValues);
+        if (!response.ok || !responseRepos.ok) {
+            console.log(`Fetch Error`);
+            console.clear();
+        } else {
+            // Get Github Info
+            const github = await response.json();
+            const githubRepos = await responseRepos.json();
+            const {name,html_url,bio,blog,avatar_url,login,public_repos,repos_url,starred_url,followers,following} = github;
+            githubRepos.map(repo => {
+              const {name,html_url,created_at,owner,topics,license,updated_at,deployments_url,language,homepage,description} = repo;
+              const filteredRepo = { name, owner, url: html_url, topics, date: created_at, license, updated: updated_at, homepage, language, deployment: deployments_url, description};
+              repositories.push(filteredRepo);
+            });
+            const user = { name, url: html_url, bio, projects: repositories, website: blog, avatar: avatar_url, login, repoLink: repos_url, repoNum: public_repos, starred: starred_url, followers, following };
 
-              githubRepos.map(repo => {
-                const {name,html_url,created_at,owner,topics,license,updated_at,deployments_url,language,homepage,description} = repo;
-                const filteredRepo = { name, owner, url: html_url, topics, date: created_at, license, updated: updated_at, homepage, language, deployment: deployments_url, description};
-                repositories.push(filteredRepo);
-              });
- 
-              const user = { name, url: html_url, bio, projects: repositories, website: blog, avatar: avatar_url, login, repoLink: repos_url, repoNum: public_repos, starred: starred_url, followers, following };
-              
-              onFormSubmit(user, formValues);
-          };
+            afterGitUserCreated(user, formValues);
+        };
       }
 
-      const onFormSubmit = (user, formValues) => {
+      const afterGitUserCreated = (user, formValues) => {
         getDocs(collection(db, `githubUsers`)).then((snapshot) => {
           let updatedUsers = snapshot.docs.map(entry => {
             return {...entry.data(), id: entry.id}
@@ -189,21 +193,22 @@
             $(`#users`).val(JSON.stringify(updatedUsers));
             let formValues = $(`.php`).serializeObject();
             console.log(`Form Values`, formValues);
-            updateDoc(doc(db, `githubUsers`, updatedUsers.filter(usr => usr.login == user.login)[0].id.toString()), {
-              ...user,
-              id: updatedUsers.filter(usr => usr.login == user.login)[0].id.toString(),
-            }).then(updatedUser => {
-              console.log(`User Updated`, updatedUser);
-            }).catch(error => console.log(error));
+            // updateDoc(doc(db, `githubUsers`, updatedUsers.filter(usr => usr.login == user.login)[0].id.toString()), {
+            //   ...user,
+            //   id: updatedUsers.filter(usr => usr.login == user.login)[0].id.toString(),
+            // }).then(updatedUser => {
+            //   console.log(`User Updated`, updatedUser);
+            // }).catch(error => console.log(error));
           } else {
             updatedUsers.push(user);
             localStorage.setItem(`users`, updatedUsers);
             console.log(`Updated Users`, updatedUsers);
             $(`#users`).val(JSON.stringify(updatedUsers));
             let formValues = $(`.php`).serializeObject();
-            addDoc(collection(db, `githubUsers`), user).then(updatedUser => {
-              console.log(`User Added`, updatedUser);
-            }).catch(error => console.log(error));
+            console.log(`Form Values`, formValues);
+            // addDoc(collection(db, `githubUsers`), user).then(updatedUser => {
+            //   console.log(`User Added`, updatedUser);
+            // }).catch(error => console.log(error));
           }
         });
       }
@@ -213,21 +218,43 @@
         let url = <?php echo json_encode($page) ?>;
         console.log(`PHP Website`, url);
         init();
+
+        // Form Changes
         $(`.php`).on(`submit`, event => {
-          let formValues = $(`.php`).serializeObject();
-          getGithubData(formValues);
           event.preventDefault();
+          let formValues = $(`.php`).serializeObject();
+          let username = formValues.username;
+          
+          // Get Users
+          getDocs(collection(db, `githubUsers`)).then((snapshot) => {
+            let updatedUsers = snapshot.docs.map(entry => {
+              return {...entry.data(), id: entry.id}
+            });
 
-          // $.ajax({
-          //   type: `POST`,
-          //   url: <?php echo $localPage ?>,
-          //   success: success => console.log(success, `Success`),
-          //   error: error => console.log(error, `Error`),
-          //   data: {
-          //     ...formValues
-          //   }
-          // });
+            if (updatedUsers.map(usr => usr?.login).includes(username)) {
+              console.log(`Existing User`, updatedUsers.filter(usr => usr?.login == username)[0]);
 
+              // If User Exists
+              $(`#users`).val(JSON.stringify(updatedUsers));
+              let formValues = $(`.php`).serializeObject();
+              let formData = {...formValues, users: JSON.parse(formValues.users)};
+              console.log(`formData`, formData);
+
+              $.ajax({
+                type: `POST`,
+                url: `<?php echo (string) $localPage ?>`,
+                error: error => console.log(error, `Error`),
+                data: {
+                  form: {...formData}
+                },
+              });
+
+              window.history.replaceState(null, null, `?users=${JSON.stringify(updatedUsers)}`);
+
+            } else { // User Does Not Exist
+              getGithubData(formValues);
+            }
+          });
         });
       });
 </script>

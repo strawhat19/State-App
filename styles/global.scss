@@ -1,21 +1,28 @@
-// *, *::before, *::after {
-//     margin: 0;
-//     padding: 0;
-//     box-sizing: border-box;
-// }
+:root {
+    --transition: 300ms ease-in-out;
+    --linkColor: #2a5d84;
+    --linkHover: #0079a1;
+    --boldFont: 600;
+}
 
-// body {
-//     display: flex;
-//     color: white;
-//     background: black;
-//     font-family: 'Montserrat';
-//     justify-content: center;
-//     align-items: center;
-//     min-height: 100vh;
-// }
+*,*::before,*::after {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
 
 .hidden {
     display: none;
+}
+
+a {
+    color: var(--linkColor);
+    font-weight: var(--boldFont);
+    transition: 300ms ease-in-out;
+}
+
+button {
+    background: var(--linkColor);
 }
 
 main {
@@ -49,18 +56,7 @@ main {
     }
 }
 
-a {
-    color: var(--linkColor);
-    font-weight: var(--boldFont);
-    transition: 300ms ease-in-out;
-}
 
-:root {
-    --transition: 300ms ease-in-out;
-    --linkColor: #2a5d84;
-    --linkHover: #0079a1;
-    --boldFont: 600;
-}
 
 .row {
     max-width: 64rem;

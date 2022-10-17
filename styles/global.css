@@ -1,5 +1,28 @@
+:root {
+  --transition: 300ms ease-in-out;
+  --linkColor: #2a5d84;
+  --linkHover: #0079a1;
+  --boldFont: 600;
+}
+
+*, *::before, *::after {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
 .hidden {
   display: none;
+}
+
+a {
+  color: var(--linkColor);
+  font-weight: var(--boldFont);
+  transition: 300ms ease-in-out;
+}
+
+button {
+  background: var(--linkColor);
 }
 
 main {
@@ -31,19 +54,6 @@ main .formInner {
 main .formInner input[type=email], main .formInner input[type=text], main .formInner button {
   width: 100%;
   border-radius: 10px;
-}
-
-a {
-  color: var(--linkColor);
-  font-weight: var(--boldFont);
-  transition: 300ms ease-in-out;
-}
-
-:root {
-  --transition: 300ms ease-in-out;
-  --linkColor: #2a5d84;
-  --linkHover: #0079a1;
-  --boldFont: 600;
 }
 
 .row {
