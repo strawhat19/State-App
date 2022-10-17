@@ -3,7 +3,24 @@
   <head>
   <?php
         include('localStorage.php');
-        include('head.php');
+        if (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on') {
+          $url = "https://";
+      } else {
+          $url = "http://";
+          $url.=$_SERVER['HTTP_HOST'];
+          $url.=$_SERVER['REQUEST_URI'];
+          $url;
+      }
+      $page = $url;
+      $localPage = '/apps/State-App/';
+      $title = 'PHP Form Submissions';
+
+      if (isset($_POST['submitForm'])) {
+        $users = json_decode($_POST['users']);
+        $username = $_POST['username'];
+
+        print_r($username);
+      }
 ?>
     <meta charset="UTF-8">
     <!-- Refresh Page Every 10 Seconds -->
@@ -196,6 +213,7 @@
 
       // Get Data from Database
       window.addEventListener(`DOMContentLoaded`, event => {
+        event.preventDefault();
           let url = <?php echo json_encode($page) ?>;
           console.log(`PHP Website`, url);
           init();

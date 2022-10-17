@@ -7,8 +7,8 @@
                 <input type="text" name="username" id="username" placeholder="Github Username">
                 <button name="submitForm" type="submit" class="submitButton">Submit</button>
             </span>
-        </form>
     </main>
+
     <?php 
         if (isset($_POST['submitForm'])) {
             $users = json_decode($_POST['users']);

@@ -1,20 +1,21 @@
 <?php 
     if (isset($_POST['submitForm'])) {
-        $email = $_POST['email'];
-        $password = $_POST['password'];
-        $user = json_decode($_POST['user']);
+        $users = json_decode($_POST['users']);
+        $username = $_POST['username'];
 
-        if (empty($user) || empty($email) || empty($password)) {
+        print_r($_POST);
+
+        if (empty($users) || empty($username)) {
             exit();
         } else {
-            print_r($email);
-            print_r($password);
+            print_r($users);
+            print_r($username);
 
-            foreach($user->projects as $index=>$project) { 
+            foreach($users as $index=>$user) { 
                 ?>
-                    <div class="project" title="<?php echo $project->name; ?>">
+                    <div class="user" title="<?php echo $user->name; ?>">
                         <span class="index"><?php echo $index+1; ?></span>
-                        <?php echo $project->name; ?>
+                        <?php echo $user->name; ?>
                     </div>
                 <?php
             } 
