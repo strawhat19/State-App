@@ -46,6 +46,12 @@ a {
   max-width: 64rem;
 }
 
+.phpCode {
+  background: black;
+  font-weight: "montserrat";
+  color: white;
+}
+
 .userCont {
   width: 100%;
   display: flex;

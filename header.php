@@ -1,17 +1,9 @@
 <!DOCTYPE html>
 <html lang="en">
   <head>
-  <?php if (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on') {
-        $url = "https://";
-    } else {
-        $url = "http://";
-        $url.=$_SERVER['HTTP_HOST'];
-        $url.=$_SERVER['REQUEST_URI'];
-        $url;
-    }
-    $page = $url;
-    $title = 'PHP Form Submissions'
-  ?>
+  <?php include('head.php');
+        include('localStorage.php');
+?>
     <meta charset="UTF-8">
     <!-- Refresh Page Every 10 Seconds -->
     <!-- <meta http-equiv="refresh" content="10" URL="<?php // echo $page; ?>"> -->
@@ -26,26 +18,26 @@
     <title><?php echo $title; ?></title>
 </head>
 <body>
-  <div class="contain-to-grid">
-    <nav class="top-bar" data-topbar>
-        <ul class="title-area">
-        <li class="name">
-            <h1><a href="<?php echo $page; ?>"><i class="fas fa-globe-americas"></i> <?php echo $title; ?></a></h1>
-        </li>
-        <li class="toggle-topbar menu-icon">
-            <a href="#">
-            <span>Menu</span>
-            </a>
-        </li>
-        </ul>
+<div class="contain-to-grid">
+  <nav class="top-bar" data-topbar>
+      <ul class="title-area">
+      <li class="name">
+          <h1><a href="<?php echo $page; ?>"><i class="fas fa-globe-americas"></i> <?php echo $title; ?></a></h1>
+      </li>
+      <li class="toggle-topbar menu-icon">
+          <a href="#">
+          <span>Menu</span>
+          </a>
+      </li>
+      </ul>
 
-        <section class="top-bar-section">
-        <!-- Right Nav Section -->
-        <ul class="right">
-            <li class="active"><a href="/applications">Applications</a></li>
-        </ul>
-        </section>
-    </nav>
+      <section class="top-bar-section">
+      <!-- Right Nav Section -->
+      <ul class="right">
+          <li class="active"><a href="/applications">Applications</a></li>
+      </ul>
+      </section>
+  </nav>
 </div>
 <script type="module" src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js" defer></script>
 <script type="module" defer>
@@ -99,7 +91,8 @@
           localStorage.setItem(`users`, JSON.stringify(updatedUsers))
         );
         console.log(`Registered Users`, updatedUsers);
-          
+        console.log(`PHP Local Storage`, <?php echo json_encode((string)LocalStorage::getInstance()) ?>);
+
         // Initialize Apps
         updatedUsers.forEach((user, userIndex) => {
           // Create Users
@@ -249,6 +242,29 @@
           };
       }
 
+      $.fn.serializeObject = function(){
+          var o = {};
+          var a = this.serializeArray();
+          $.each(a, function() {
+              if (o[this.name] !== undefined) {
+                  if (!o[this.name].push) {
+                      o[this.name] = [o[this.name]];
+                  }
+                  o[this.name].push(this.value || '');
+              } else {
+                  o[this.name] = this.value || '';
+              }
+          });
+          return o;
+      };
+      
+      $(function() {
+          $('form').submit(function() {
+              $('#result').text(JSON.stringify($('form').serializeObject()));
+              return false;
+          });
+      });
+
       // Get Data from Database
       window.addEventListener(`DOMContentLoaded`, event => {
           let users = JSON.parse(localStorage.getItem(`users`)) || [];
@@ -258,8 +274,9 @@
 
           $(`.php`).on(`submit`, event => {
             event.preventDefault();
-            getGithubData($(`#username`).val());
-            init();
+            let formValues = $(`.php`).serializeObject();
+            console.log({...formValues, user: users[0], users});
+            
           });
       });
 </script>

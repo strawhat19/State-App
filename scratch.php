@@ -1,6 +1,8 @@
 <div id="lowerContainer" class="row">
       <section class="apps appsInit">
-        <?php if (isset($_POST['submitForm'])) {
+        <?php 
+    
+        if (isset($_POST['submitForm'])) {
                 $user = json_decode($_POST['user']);
                 $username = $_POST['username'];
 
