@@ -10,17 +10,10 @@
           $url.=$_SERVER['HTTP_HOST'];
           $url.=$_SERVER['REQUEST_URI'];
           $url;
-      }
+        }
       $page = $url;
       $localPage = '/apps/State-App/';
       $title = 'PHP Form Submissions';
-
-      if (isset($_POST['submitForm'])) {
-        $users = json_decode($_POST['users']);
-        $username = $_POST['username'];
-
-        print_r($username);
-      }
 ?>
     <meta charset="UTF-8">
     <!-- Refresh Page Every 10 Seconds -->
@@ -110,7 +103,8 @@
           localStorage.setItem(`users`, JSON.stringify(updatedUsers))
         );
         console.log(`Registered Users`, updatedUsers);
-        console.log(`PHP Local Storage`, <?php echo json_encode((string)LocalStorage::getInstance()) ?>);
+        console.log(`PHP Local Storage`, JSON.parse(<?php echo json_encode((string)LocalStorage::getInstance()) ?>));
+        // console.log(`PHP Array Seach`, <?php // echo array_search('users', json_decode((string)LocalStorage::getInstance())); ?>);
 
         const deleteButtons = domA(`.deleteButton`);
         // If User Clicks Delete
@@ -146,7 +140,6 @@
 
       const getGithubData = async (formValues) => {
         let username = formValues.username;
-        console.log(username);
 
           const repoURL = `https://api.github.com/users/${username}/repos`;
           const githubURL = `https://api.github.com/users/${username}`;
@@ -158,69 +151,82 @@
               console.log(`Fetch Error`);
               console.clear();
           } else {
-              const githubRepos = await responseRepos.json();
+             // Get Github Info
               const github = await response.json();
+              const githubRepos = await responseRepos.json();
               const {name,html_url,bio,blog,avatar_url,login,public_repos,repos_url,starred_url,followers,following} = github;
 
               githubRepos.map(repo => {
                 const {name,html_url,created_at,owner,topics,license,updated_at,deployments_url,language,homepage,description} = repo;
-                const filteredRepo = new Object(name,html_url,created_at,owner,topics,license,updated_at,deployments_url,language,homepage,description);
+                const filteredRepo = { name, owner, url: html_url, topics, date: created_at, license, updated: updated_at, homepage, language, deployment: deployments_url, description};
                 repositories.push(filteredRepo);
               });
  
-              const user = new Object(name,html_url,bio,repositories,blog,avatar_url,login,public_repos,repos_url,starred_url,followers,following);
+              const user = { name, url: html_url, bio, projects: repositories, website: blog, avatar: avatar_url, login, repoLink: repos_url, repoNum: public_repos, starred: starred_url, followers, following };
               
-              getDocs(collection(db, `githubUsers`)).then((snapshot) => {
-                let updatedUsers = snapshot.docs.map(entry => {
-                  return {...entry.data(), id: entry.id}
-                });
-                snapshot.docs.length > 0 && (
-                  localStorage.setItem(`users`, JSON.stringify(updatedUsers))
-                  );
-
-                  // Get Users
-                  let collectionID = `githubUsers`;
-                  let projectID = `github-projects-81e89`;
-                  console.log(`Form Values`, formValues);
-                  console.log(`Github User Created`, user);
-                  console.log(`Current Users`, updatedUsers);
-                  $(`#users`).val(JSON.stringify(updatedUsers));
-                  console.log(`PHP Local Storage`, <?php echo json_encode((string)LocalStorage::getInstance()) ?>);
-                  let firestoreUsers = fetch(`https://firestore.googleapis.com/v1/projects/${projectID}/databases/(default)/documents/${collectionID}/`).then(res => res.json()).then(dbUsers => console.log(`firestoreUsers`, dbUsers)).catch(error => console.log(`REST API Error Fetching Data`, error));
-                  
-          
-                  // If User Exists
-                  if (updatedUsers.map(usr => usr?.login).includes(user?.login)) {
-                    console.log(`User Exists`);
-                    updateDoc(doc(db, `githubUsers`, updatedUsers.filter(usr => usr.login == user.login)[0].id.toString()), {
-                      ...user,
-                      id: updatedUsers.filter(usr => usr.login == user.login)[0].id.toString(),
-                    }).then(updatedUser => {
-                      console.log(`User Updated`, updatedUser);
-                    }).catch(error => console.log(error));
-                  } else {
-                    updatedUsers.push(user);
-                    localStorage.setItem(`users`, updatedUsers);
-                    console.log(`Updated Users`, updatedUsers);
-                    addDoc(collection(db, `githubUsers`), {...JSON.parse(localStorage.getItem(`user`))}).then(updatedUser => {
-                      console.log(`User Added`, updatedUser);
-                    }).catch(error => console.log(error));
-                  }
-                });
-              
+              onFormSubmit(user, formValues);
           };
+      }
+
+      const onFormSubmit = (user, formValues) => {
+        getDocs(collection(db, `githubUsers`)).then((snapshot) => {
+          let updatedUsers = snapshot.docs.map(entry => {
+            return {...entry.data(), id: entry.id}
+          });
+          snapshot.docs.length > 0 && (
+            localStorage.setItem(`users`, JSON.stringify(updatedUsers))
+            );
+
+          // Get Users
+          let collectionID = `githubUsers`;
+          let projectID = `github-projects-81e89`;
+          // let firestoreUsers = fetch(`https://firestore.googleapis.com/v1/projects/${projectID}/databases/(default)/documents/${collectionID}/`).then(res => res.json()).then(dbUsers => console.log(`firestoreUsers`, dbUsers)).catch(error => console.log(`REST API Error Fetching Data`, error));
+          
+          // If User Exists
+          if (updatedUsers.map(usr => usr?.login).includes(user?.login)) {
+            console.log(`User Exists`, updatedUsers);
+            $(`#users`).val(JSON.stringify(updatedUsers));
+            let formValues = $(`.php`).serializeObject();
+            console.log(`Form Values`, formValues);
+            updateDoc(doc(db, `githubUsers`, updatedUsers.filter(usr => usr.login == user.login)[0].id.toString()), {
+              ...user,
+              id: updatedUsers.filter(usr => usr.login == user.login)[0].id.toString(),
+            }).then(updatedUser => {
+              console.log(`User Updated`, updatedUser);
+            }).catch(error => console.log(error));
+          } else {
+            updatedUsers.push(user);
+            localStorage.setItem(`users`, updatedUsers);
+            console.log(`Updated Users`, updatedUsers);
+            $(`#users`).val(JSON.stringify(updatedUsers));
+            let formValues = $(`.php`).serializeObject();
+            addDoc(collection(db, `githubUsers`), user).then(updatedUser => {
+              console.log(`User Added`, updatedUser);
+            }).catch(error => console.log(error));
+          }
+        });
       }
 
       // Get Data from Database
       window.addEventListener(`DOMContentLoaded`, event => {
-        event.preventDefault();
-          let url = <?php echo json_encode($page) ?>;
-          console.log(`PHP Website`, url);
-          init();
-          $(`.php`).on(`submit`, event => {
-            let formValues = $(`.php`).serializeObject();
-            getGithubData(formValues);
-            event.preventDefault();
-          });
+        let url = <?php echo json_encode($page) ?>;
+        console.log(`PHP Website`, url);
+        init();
+        $(`.php`).on(`submit`, event => {
+          let formValues = $(`.php`).serializeObject();
+          getGithubData(formValues);
+          event.preventDefault();
+
+          // $.ajax({
+          //   type: `POST`,
+          //   url: <?php echo $localPage ?>,
+          //   success: success => console.log(success, `Success`),
+          //   error: error => console.log(error, `Error`),
+          //   data: {
+          //     ...formValues
+          //   }
+          // });
+
+        });
       });
 </script>
