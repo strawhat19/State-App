@@ -25,7 +25,26 @@ button {
   background: var(--linkColor);
 }
 
-main {
+span.title {
+  font-weight: 600 !important;
+}
+
+.userBio {
+  max-width: 240px;
+}
+
+.hero h1 {
+  font-weight: bold;
+  font-size: 3em;
+  line-height: 1em;
+  padding: 0.3em 0;
+  display: flex;
+  grid-gap: 10px;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.buttonSection {
   width: 100%;
   display: flex;
   padding-top: 2em;
@@ -34,7 +53,7 @@ main {
   justify-content: center;
   grid-gap: 15px;
 }
-main form {
+.buttonSection form {
   width: 100%;
   display: flex;
   grid-gap: 10px;
@@ -42,7 +61,7 @@ main form {
   flex-direction: column;
   justify-content: center;
 }
-main .formInner {
+.buttonSection .formInner {
   width: 90%;
   display: flex;
   margin: 0 auto;
@@ -51,7 +70,7 @@ main .formInner {
   flex-direction: column;
   justify-content: center;
 }
-main .formInner input[type=email], main .formInner input[type=text], main .formInner button {
+.buttonSection .formInner input[type=email], .buttonSection .formInner input[type=text], .buttonSection .formInner button {
   width: 100%;
   border-radius: 10px;
 }

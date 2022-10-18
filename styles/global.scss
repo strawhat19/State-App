@@ -25,7 +25,30 @@ button {
     background: var(--linkColor);
 }
 
-main {
+span {
+    &.title {
+        font-weight: 600 !important;
+    }
+}
+
+.userBio {
+    max-width: 240px;
+}
+
+.hero {
+    h1 {
+        font-weight: bold;
+        font-size: 3em;
+        line-height: 1em;
+        padding: 0.3em 0;
+        display: flex;
+        grid-gap: 10px;
+        align-items: center;
+        justify-content: space-between;
+    }
+}
+
+.buttonSection {
     width: 100%;
     display: flex;
     padding-top: 2em;
@@ -55,8 +78,6 @@ main {
         }
     }
 }
-
-
 
 .row {
     max-width: 64rem;

@@ -48,11 +48,7 @@
       <!-- Right Nav Section -->
       <ul class="right">
           <li class="active">
-            <a href="#" class="usersCount">
-              <script type="module" defer>
-                $(`.usersCount`).html(JSON.parse(localStorage.getItem(`users`)).length + ` User(s)`);
-              </script>
-            </a>
+            <a href="#" class="usersCount"></a>
           </li>
       </ul>
       </section>
@@ -109,17 +105,59 @@
         snapshot.docs.length > 0 && (
           localStorage.setItem(`users`, JSON.stringify(updatedUsers))
         );
-        console.log(`Registered Users`, updatedUsers);
-        console.log(`PHP Local Storage`, JSON.parse(<?php echo json_encode((string)LocalStorage::getInstance()) ?>));
-        // console.log(`PHP Array Seach`, <?php // echo array_search('users', json_decode((string)LocalStorage::getInstance())); ?>);
+
+        let usersCount = dom(`.usersCount`);
+        usersCount.innerHTML = updatedUsers.length + ` User(s)`;
 
         const deleteButtons = domA(`.deleteButton`);
         // If User Clicks Delete
         deleteButtons.forEach(button => button.addEventListener(`click`, event => {
           event.preventDefault();
+          let usersCount = dom(`.usersCount`);
+          let usersSection = event.target.parentElement.parentElement.parentElement.parentElement;
+          usersCount.innerHTML = parseFloat(usersCount.innerHTML) - 1 + ` User(s)`;
+          usersSection.remove();
           deleteDoc(doc(db, 'githubUsers', event.target.id)).then((data) => console.log(`User Deleted`));
         }));
       });
+    }
+
+
+    function getElementY(query) {
+      return window.pageYOffset + document.querySelector(query).getBoundingClientRect().top
+    }
+
+    function smoothScrollTo(element, duration) {
+      var startingY = window.pageYOffset
+      var elementY = getElementY(element)
+      // If element is close to page's bottom then window will scroll only to some position above the element.
+      var targetY = document.body.scrollHeight - elementY < window.innerHeight ? document.body.scrollHeight - window.innerHeight : elementY
+      var diff = targetY - startingY
+      // Easing function: easeInOutCubic
+      // From: https://gist.github.com/gre/1650294
+      var easing = function (t) { return t<.5 ? 4*t*t*t : (t-1)*(2*t-2)*(2*t-2)+1 }
+      var start
+
+      if (!diff) return
+
+      // Bootstrap our animation - it will get called right before next frame shall be rendered.
+      window.requestAnimationFrame(function step(timestamp) {
+        if (!start) start = timestamp
+        // Elapsed miliseconds since start of scrolling.
+        var time = timestamp - start
+        // Get percent of completion in range [0, 1].
+        var percent = Math.min(time / duration, 1)
+        // Apply the easing.
+        // It can cause bad-looking slow frames in browser performance tool, so be careful.
+        percent = easing(percent)
+
+        window.scrollTo(0, startingY + diff * percent)
+
+        // Proceed with animation as long as we wanted it to.
+        if (time < duration) {
+          window.requestAnimationFrame(step)
+        }
+      })
     }
 
     $.fn.serializeObject = function(){
@@ -153,7 +191,6 @@
         const responseRepos = await fetch(repoURL);
         const response = await fetch(githubURL);
 
-        afterGitUserCreated(user, formValues);
         if (!response.ok || !responseRepos.ok) {
             console.log(`Fetch Error`);
             console.clear();
@@ -173,6 +210,19 @@
         };
       }
 
+      const addUser = async (user, formValues) => {
+        let freshUser = await addDoc(collection(db, `githubUsers`), user).then(updatedUser => {
+          let usersID = updatedUser._key.path.segments[1];
+          updateDoc(doc(db, `githubUsers`, usersID), {
+              ...user,
+              id: usersID,
+            }).then(updatedUser => {
+              console.log(`User Added`);
+              window.location.reload(true);
+            }).catch(error => console.log(error));
+        }).catch(error => console.log(error));
+      }
+
       const afterGitUserCreated = (user, formValues) => {
         getDocs(collection(db, `githubUsers`)).then((snapshot) => {
           let updatedUsers = snapshot.docs.map(entry => {
@@ -181,34 +231,27 @@
           snapshot.docs.length > 0 && (
             localStorage.setItem(`users`, JSON.stringify(updatedUsers))
             );
-
-          // Get Users
-          let collectionID = `githubUsers`;
-          let projectID = `github-projects-81e89`;
-          // let firestoreUsers = fetch(`https://firestore.googleapis.com/v1/projects/${projectID}/databases/(default)/documents/${collectionID}/`).then(res => res.json()).then(dbUsers => console.log(`firestoreUsers`, dbUsers)).catch(error => console.log(`REST API Error Fetching Data`, error));
           
           // If User Exists
           if (updatedUsers.map(usr => usr?.login).includes(user?.login)) {
             console.log(`User Exists`, updatedUsers);
-            $(`#users`).val(JSON.stringify(updatedUsers));
+            // $(`#users`).val(JSON.stringify(updatedUsers));
             let formValues = $(`.php`).serializeObject();
-            console.log(`Form Values`, formValues);
-            // updateDoc(doc(db, `githubUsers`, updatedUsers.filter(usr => usr.login == user.login)[0].id.toString()), {
-            //   ...user,
-            //   id: updatedUsers.filter(usr => usr.login == user.login)[0].id.toString(),
-            // }).then(updatedUser => {
-            //   console.log(`User Updated`, updatedUser);
-            // }).catch(error => console.log(error));
+            // console.log(`Form Values`, formValues);
+            updateDoc(doc(db, `githubUsers`, updatedUsers.filter(usr => usr.login == user.login)[0].id.toString()), {
+              ...user,
+              id: updatedUsers.filter(usr => usr.login == user.login)[0].id.toString(),
+            }).then(updatedUser => {
+              console.log(`User Updated`, updatedUser);
+            }).catch(error => console.log(error));
           } else {
             updatedUsers.push(user);
             localStorage.setItem(`users`, updatedUsers);
-            console.log(`Updated Users`, updatedUsers);
-            $(`#users`).val(JSON.stringify(updatedUsers));
+            // console.log(`Updated Users`, updatedUsers);
+            // $(`#users`).val(JSON.stringify(updatedUsers));
             let formValues = $(`.php`).serializeObject();
-            console.log(`Form Values`, formValues);
-            // addDoc(collection(db, `githubUsers`), user).then(updatedUser => {
-            //   console.log(`User Added`, updatedUser);
-            // }).catch(error => console.log(error));
+            // console.log(`Form Values`, formValues);
+            addUser(user, formValues);
           }
         });
       }
@@ -216,10 +259,27 @@
       // Get Data from Database
       window.addEventListener(`DOMContentLoaded`, event => {
         let url = <?php echo json_encode($page) ?>;
-        console.log(`PHP Website`, url);
         init();
 
         // Form Changes
+        $(`.php`).on(`input`, event => {
+          event.preventDefault();
+          let formValues = $(`.php`).serializeObject();
+          let username = formValues.username;
+          
+          // Filter Users
+          let userSections = domA(`.userSection`);
+          userSections.forEach(userSec => {
+            let title = userSec.children[0].children[0].children[0].children[0].children[0].innerHTML;
+            if (title.toLowerCase().includes(formValues.username.toLowerCase()) || userSec.getAttribute(`name`).toLowerCase().includes(formValues.username.toLowerCase())) {
+              userSec.style.display = `block`;
+            } else {
+              userSec.style.display = `none`;
+            }
+          });
+
+        });
+
         $(`.php`).on(`submit`, event => {
           event.preventDefault();
           let formValues = $(`.php`).serializeObject();
@@ -232,26 +292,14 @@
             });
 
             if (updatedUsers.map(usr => usr?.login).includes(username)) {
-              console.log(`Existing User`, updatedUsers.filter(usr => usr?.login == username)[0]);
-
-              // If User Exists
-              $(`#users`).val(JSON.stringify(updatedUsers));
+              let existingUser = updatedUsers.filter(usr => usr?.login == username)[0];
               let formValues = $(`.php`).serializeObject();
-              let formData = {...formValues, users: JSON.parse(formValues.users)};
-              console.log(`formData`, formData);
+              let usersSection = document.querySelector(`section[id="${existingUser.id}"]`);
+              // smoothScrollTo.bind(usersSection, 500);
 
-              $.ajax({
-                type: `POST`,
-                url: `<?php echo (string) $localPage ?>`,
-                error: error => console.log(error, `Error`),
-                data: {
-                  form: {...formData}
-                },
-              });
-
-              window.history.replaceState(null, null, `?users=${JSON.stringify(updatedUsers)}`);
-
+              console.log(`Existing User`, existingUser);
             } else { // User Does Not Exist
+              console.log(`User Does Not Exist`);
               getGithubData(formValues);
             }
           });

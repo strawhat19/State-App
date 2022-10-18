@@ -1,3 +1,14 @@
+// // traverse all results
+// foreach ($xpath->query('//row[@name="title"]') as $rowNode) {
+//     echo $rowNode->nodeValue; // will be 'this item'
+// }
+
+// // Or access the first result directly
+// $rowNode = $xpath->query('//row[@name="title"][1]')->item(0);
+// if ($rowNode instanceof DomElement) {
+//     echo $rowNode->nodeValue;
+// }
+
 <div id="lowerContainer" class="row">
       <section class="apps appsInit">
         <?php 

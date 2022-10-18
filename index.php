@@ -1,61 +1,58 @@
 <?php include('header.php')?>
   <div id="wrapper">
-      <main class="mainSection">
-          <form class="php" method="post" action="<?php echo $localPage ?>">
+      <div class="formSection buttonSection">
+          <form class="php" action="<?php echo $localPage ?>" method="post">
               <span class="formInner">
                   <input type="hidden" name="users" id="users">
                   <input type="text" name="username" id="username" placeholder="Github Username">
                   <button name="submitForm" type="submit" class="submitButton">Submit</button>
               </span>
-      </main>
+      </div>
       <?php 
-      if (isset($_POST['form'])) {
-        $username = $_POST['username'];
-        $users = json_decode($_POST['users']);
-        if (is_array($users)) {
-          LocalStorage::getInstance()->commit($users);
-        }
+      $firestoreUsers = file_get_contents('https://firestore.googleapis.com/v1/projects/github-projects-81e89/databases/(default)/documents/githubUsers/');
 
-        print_r($users);
-      }
-      $users = json_decode((string)LocalStorage::getInstance());
+      $users = json_decode($firestoreUsers)->documents;
       if (is_array($users)) {
-        foreach($users as $userIndex=>$user) {
+        foreach(array_reverse($users) as $userIndex=>$user) {
           ?>
-          <section class="userSection <?php echo $user->login ?>" id="<?php echo $user->id ?>">
-            <div class="<?php echo $user->login ?> user hero" id="<?php echo $user->id ?>">
+          <section class="userSection" name="<?php echo $user->fields->login->stringValue ?>" id="<?php echo $user->fields->id->stringValue ?>">
+            <div class="<?php echo $user->fields->login->stringValue ?> user hero" id="<?php echo $user->fields->id->stringValue ?>">
               <div class="row userRow">
                 <div class="userCont large-12 columns">
-                  <?php if ($user->name): ?>
-                    <h1 class="title">(<?php echo $userIndex+1 ?>) <?php echo $user->name; ?>'s Apps</h1>
+                  <?php if (!empty($user->fields->name->stringValue)): ?>
+                    <h1 class="title">(<?php echo $userIndex+1 ?>) <span id="<?php echo $user->fields->name->stringValue; ?>" class="title titleOf-<?php echo $user->fields->id->stringValue; ?>"><?php echo $user->fields->name->stringValue; ?>'s</span> Apps</h1>
                   <?php else: ?>
-                    <h1 class="title">(<?php echo $userIndex+1 ?>) <?php echo $user->login; ?>'s Apps</h1>
+                    <h1 class="title">(<?php echo $userIndex+1 ?>) <span id="<?php echo $user->fields->login->stringValue; ?>" class="title titleOf-<?php echo $user->fields->id->stringValue; ?>"><?php echo $user->fields->login->stringValue; ?>'s</span> Apps</h1>
                   <?php endif ?>
                   <div class="user">
                     <div class="userInner">
-                        <?php if ($user->name): ?><div class="userName"><?php echo $user->name; ?></div><?php endif ?>
-                        <span class="linkContainer <?php echo $user->login; ?>"><a class="githubLink userGit" href="<?php echo $user->url; ?>"><img src="<?php echo $user->avatar; ?>" class="userAvatar" /> <?php echo $user->login; ?></a></span>
-                        <?php if ($user->bio): ?><div class="userBio"><?php echo $user->bio; ?></div><?php endif ?>
+                        <?php if (!empty($user->fields->name->stringValue)): ?><div class="userName"><?php echo $user->fields->name->stringValue; ?></div><?php endif ?>
+                        <span class="linkContainer <?php echo $user->fields->login->stringValue; ?>"><a class="githubLink userGit" href="<?php echo $user->fields->url->stringValue; ?>"><img src="<?php echo $user->fields->avatar->stringValue; ?>" class="userAvatar" /> <?php echo $user->fields->login->stringValue; ?></a></span>
+                        <?php if (!empty($user->fields->bio->stringValue)): ?><div class="userBio"><?php echo $user->fields->bio->stringValue; ?></div><?php endif ?>
                     </div>
                   </div>
                 </div>
               </div>
-              <main id="<?php echo $user->login; ?>Section" class="section">
-                <span id="<?php echo $user->login; ?>Button" class="formInner">
-                    <button id="<?php echo $user->id; ?>" name="Delete" class="deleteButton submitButton">Delete</button>
+              <div id="<?php echo $user->fields->login->stringValue; ?>Section" class="buttonSection">
+                <span id="<?php echo $user->fields->login->stringValue; ?>Button" class="formInner">
+                    <button id="<?php echo $user->fields->id->stringValue; ?>" name="Delete" class="deleteButton submitButton">Delete</button>
                 </span>
-              </main>
+              </div>
             </div>
             <div id="lowerContainer" class="row">
-              <section id="<?php echo $user->login; ?>apps" class="apps appsInit appsSection">
-                <?php foreach($user->projects as $index=>$app) {
+              <section id="<?php echo $user->fields->login->stringValue; ?>apps" class="apps appsInit appsSection">
+                <?php foreach($user->fields->projects->arrayValue->values as $index=>$app) {
                     ?>
-                        <div class="app" title="<?php echo $app->login; ?>">
+                        <div class="app" title="<?php echo $app->mapValue->fields->name->stringValue; ?>">
                             <span class="index"><?php echo $index+1; ?></span>
                             <div class="appInner">
-                            <a class="githubLink" href="<?php echo $app->url; ?>"><i class="fab fa-github"></i> <?php echo $app->name; ?></a>
-                            <a class="localLink" href="./apps/<?php echo $app->name; ?>/"><i class="fas fa-map-marker-alt"></i> <?php echo $app->name; ?></a>
-                            <?php if ($app->homepage): ?><a class="liveLink" href="<?php echo $app->homepage; ?>"><i class="fas fa-globe-americas"></i> <?php echo $app->name; ?></a><?php endif ?>
+                              <a class="githubLink" href="<?php echo $app->mapValue->fields->url->stringValue; ?>"><i class="fab fa-github"></i> <?php echo $app->mapValue->fields->name->stringValue; ?></a>
+                              <a class="localLink" href="./apps/<?php echo $app->mapValue->fields->name->stringValue; ?>/"><i class="fas fa-map-marker-alt"></i> <?php echo $app->mapValue->fields->name->stringValue; ?></a>
+                              <?php if (!empty($app->mapValue->fields->homepage->stringValue)): ?>
+                                <a class="liveLink" href="<?php echo $app->mapValue->fields->homepage->stringValue; ?>">
+                                  <i class="fas fa-globe-americas"></i> <?php echo $app->mapValue->fields->name->stringValue; ?>
+                                </a>
+                              <?php endif ?>
                             </div>
                         </div>
                     <?php
