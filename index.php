@@ -12,7 +12,7 @@
       $firestoreUsers = file_get_contents('https://firestore.googleapis.com/v1/projects/github-projects-81e89/databases/(default)/documents/githubUsers/');
 
       $users = json_decode($firestoreUsers)->documents;
-      if (is_array($users)) {
+      if (is_array($users) && count($users) > 0) {
         foreach(array_reverse($users) as $userIndex=>$user) {
           ?>
           <section class="userSection" name="<?php echo $user->fields->login->stringValue ?>" id="<?php echo $user->fields->id->stringValue ?>">
@@ -62,6 +62,10 @@
           </section>
           <?php
         }
+      } else {
+        ?>
+          <div class="noUsers">No Users Right Now</div>
+        <?php
       }
     ?>
   </div>

@@ -31,6 +31,7 @@
 </head>
 <body>
 <script type="module" src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js" defer></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/notify/0.4.2/notify.min.js" integrity="sha512-efUTj3HdSPwWJ9gjfGR71X9cvsrthIA78/Fvd/IN+fttQVy7XWkOAXb295j8B3cmm/kFKVxjiNYzKw9IQJHIuQ==" crossorigin="anonymous" referrerpolicy="no-referrer" defer></script>
 <div class="contain-to-grid">
   <nav class="top-bar" data-topbar>
       <ul class="title-area">
@@ -58,7 +59,7 @@
     // Firestore Imports
     // https://firebase.google.com/docs/web/setup#available-libraries
     import { initializeApp } from "https://www.gstatic.com/firebasejs/9.12.1/firebase-app.js";
-    import { getFirestore, collection, getDocs, onSnapshot, addDoc, deleteDoc, doc, query, where, orderBy, serverTimestamp, getDoc, updateDoc } from 'https://www.gstatic.com/firebasejs/9.12.1/firebase-firestore.js';
+    import { getFirestore, collection, getDocs, onSnapshot, addDoc, deleteDoc, doc, query, where, orderBy, serverTimestamp, getDoc, updateDoc, setDoc } from 'https://www.gstatic.com/firebasejs/9.12.1/firebase-firestore.js';
 
     // Functions 
     export const dom = (selector) => document.querySelector(selector);
@@ -111,53 +112,19 @@
 
         const deleteButtons = domA(`.deleteButton`);
         // If User Clicks Delete
-        deleteButtons.forEach(button => button.addEventListener(`click`, event => {
+        deleteButtons.forEach((button, index) => button.addEventListener(`click`, event => {
           event.preventDefault();
           let usersCount = dom(`.usersCount`);
           let usersSection = event.target.parentElement.parentElement.parentElement.parentElement;
-          usersCount.innerHTML = parseFloat(usersCount.innerHTML) - 1 + ` User(s)`;
-          usersSection.remove();
-          deleteDoc(doc(db, 'githubUsers', event.target.id)).then((data) => console.log(`User Deleted`));
+          if ((parseFloat(usersCount.innerHTML) - 1) >= 1) {
+            usersCount.innerHTML = parseFloat(usersCount.innerHTML) - 1 + ` User(s)`;
+            usersSection.remove();
+            deleteDoc(doc(db, 'githubUsers', event.target.id)).then((data) => console.log(`User Deleted`, data));
+          } else {
+            $(event.target).notify(`User Cannot Be Deleted`, {position: `top center`});
+          }
         }));
       });
-    }
-
-
-    function getElementY(query) {
-      return window.pageYOffset + document.querySelector(query).getBoundingClientRect().top
-    }
-
-    function smoothScrollTo(element, duration) {
-      var startingY = window.pageYOffset
-      var elementY = getElementY(element)
-      // If element is close to page's bottom then window will scroll only to some position above the element.
-      var targetY = document.body.scrollHeight - elementY < window.innerHeight ? document.body.scrollHeight - window.innerHeight : elementY
-      var diff = targetY - startingY
-      // Easing function: easeInOutCubic
-      // From: https://gist.github.com/gre/1650294
-      var easing = function (t) { return t<.5 ? 4*t*t*t : (t-1)*(2*t-2)*(2*t-2)+1 }
-      var start
-
-      if (!diff) return
-
-      // Bootstrap our animation - it will get called right before next frame shall be rendered.
-      window.requestAnimationFrame(function step(timestamp) {
-        if (!start) start = timestamp
-        // Elapsed miliseconds since start of scrolling.
-        var time = timestamp - start
-        // Get percent of completion in range [0, 1].
-        var percent = Math.min(time / duration, 1)
-        // Apply the easing.
-        // It can cause bad-looking slow frames in browser performance tool, so be careful.
-        percent = easing(percent)
-
-        window.scrollTo(0, startingY + diff * percent)
-
-        // Proceed with animation as long as we wanted it to.
-        if (time < duration) {
-          window.requestAnimationFrame(step)
-        }
-      })
     }
 
     $.fn.serializeObject = function(){
@@ -210,12 +177,22 @@
         };
       }
 
-      const addUser = async (user, formValues) => {
+      const updateUser = (id, user) => {
+        setDoc(doc(db, `githubUsers`, id), {
+            ...user,
+            id: id,
+        }).then(updatedUser => {
+            window.location.reload(true);
+            return updatedUser;
+        }).catch(error => console.log(error));
+    }
+
+      const addUser = async (user, formValues, users) => {
         let freshUser = await addDoc(collection(db, `githubUsers`), user).then(updatedUser => {
           let usersID = updatedUser._key.path.segments[1];
           updateDoc(doc(db, `githubUsers`, usersID), {
               ...user,
-              id: usersID,
+              id: `${users?.length}-${user?.login}-${usersID}`,
             }).then(updatedUser => {
               console.log(`User Added`);
               window.location.reload(true);
@@ -251,7 +228,16 @@
             // $(`#users`).val(JSON.stringify(updatedUsers));
             let formValues = $(`.php`).serializeObject();
             // console.log(`Form Values`, formValues);
-            addUser(user, formValues);
+
+            function uuidv4() {
+              return ([1e7]+-1e3+-4e3+-8e3+-1e11).replace(/[018]/g, c => (c ^ crypto.getRandomValues(new Uint8Array(1))[0] & 15 >> c / 4).toString(16));
+            };
+
+            let uniqueID = uuidv4().split(`-`)[0];
+            updateUser(`${updatedUsers.length}-(${user.login})-${uniqueID}`, {
+              ...user,
+              id: `${updatedUsers.length}-(${user.login})-${uniqueID}`,
+            });
           }
         });
       }
@@ -299,7 +285,6 @@
 
               console.log(`Existing User`, existingUser);
             } else { // User Does Not Exist
-              console.log(`User Does Not Exist`);
               getGithubData(formValues);
             }
           });
