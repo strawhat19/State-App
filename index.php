@@ -7,7 +7,13 @@
                   <input type="text" name="username" id="username" placeholder="Github Username">
                   <button name="submitForm" type="submit" class="submitButton">Submit</button>
               </span>
+          </form>
       </div>
+
+      <form action="<?php echo $localPage ?>" method="post">
+        <!-- <input type="text" name="username" id="username" placeholder="Github Username"> -->
+        <input name="submitForm" type="submit" class="submitButton" value="Save" />
+      </form>
       <?php 
       $firestoreUsers = file_get_contents('https://firestore.googleapis.com/v1/projects/github-projects-81e89/databases/(default)/documents/githubUsers/');
 
@@ -69,6 +75,13 @@
       }
     ?>
   </div>
+
+  <?php 
+    if (isset($_POST['submitForm'])) {
+      LocalStorage::getInstance()->setValue('submitForm', $_POST['submitForm']);
+      LocalStorage::getInstance()->commit();
+    }
+  ?>
   <?php include('footer.php')?>
 </body>
 </html>
